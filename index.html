@@ -1,15 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Face Game</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div id="game-container">
-        <canvas id="gameCanvas" width="480" height="320"></canvas>
-    </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple Worm Game</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="game-shell">
+      <h1>Simple Worm Game</h1>
+      <p class="help-text">Use arrow keys (or WASD) to move. Eat food and avoid walls or your own tail.</p>
+      <canvas id="gameCanvas" width="480" height="480" aria-label="Worm game board"></canvas>
+      <div class="hud">
+        <span>Score: <strong id="score">0</strong></span>
+        <span>Best: <strong id="best">0</strong></span>
+        <button id="restart" type="button">Restart</button>
+      </div>
+    </main>
     <script src="game.js"></script>
-</body>
+  </body>
 </html>

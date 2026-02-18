@@ -1,17 +1,64 @@
-body {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f0f0f0;
+:root {
+  color-scheme: light;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-#game-container {
-    position: relative;
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: #eef3fb;
+  color: #1a1a1a;
+}
+
+.game-shell {
+  width: min(92vw, 560px);
+  text-align: center;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.2rem;
+  box-shadow: 0 8px 28px rgba(15, 30, 60, 0.15);
+}
+
+h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+}
+
+.help-text {
+  margin: 0 0 1rem;
+  color: #46536b;
+  font-size: 0.95rem;
 }
 
 #gameCanvas {
-    border: 1px solid #000;
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 1 / 1;
+  border: 2px solid #2f3c55;
+  background: #f7fbff;
+}
+
+.hud {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+#restart {
+  border: none;
+  border-radius: 999px;
+  padding: 0.45rem 0.95rem;
+  background: #2d63f2;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#restart:hover {
+  background: #2552cb;
 }
