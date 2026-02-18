@@ -15,6 +15,8 @@ let score;
 let bestScore = Number(localStorage.getItem('worm-best-score')) || 0;
 let gameLoop;
 let isGameOver;
+let audioContext;
+let noiseBuffer;
 
 function resetGame() {
   worm = [{ x: 10, y: 10 }];
@@ -41,6 +43,107 @@ function randomFoodPosition() {
   return nextFood;
 }
 
+function ensureAudio() {
+  if (!audioContext) {
+    audioContext = new window.AudioContext();
+    noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.35, audioContext.sampleRate);
+    const samples = noiseBuffer.getChannelData(0);
+
+    for (let i = 0; i < samples.length; i += 1) {
+      samples[i] = Math.random() * 2 - 1;
+    }
+  }
+
+  if (audioContext.state === 'suspended') {
+    audioContext.resume();
+  }
+}
+
+function playMoveSound() {
+  if (!audioContext) return;
+
+  const now = audioContext.currentTime;
+  const hiss = audioContext.createBufferSource();
+  hiss.buffer = noiseBuffer;
+
+  const hissFilter = audioContext.createBiquadFilter();
+  hissFilter.type = 'bandpass';
+  hissFilter.frequency.value = 1900;
+  hissFilter.Q.value = 0.9;
+
+  const hissGain = audioContext.createGain();
+  hissGain.gain.setValueAtTime(0.0001, now);
+  hissGain.gain.exponentialRampToValueAtTime(0.018, now + 0.02);
+  hissGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
+
+  hiss.connect(hissFilter);
+  hissFilter.connect(hissGain);
+  hissGain.connect(audioContext.destination);
+
+  const tone = audioContext.createOscillator();
+  tone.type = 'sawtooth';
+  tone.frequency.setValueAtTime(160, now);
+  tone.frequency.exponentialRampToValueAtTime(110, now + 0.08);
+
+  const toneGain = audioContext.createGain();
+  toneGain.gain.setValueAtTime(0.0001, now);
+  toneGain.gain.exponentialRampToValueAtTime(0.01, now + 0.015);
+  toneGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
+
+  tone.connect(toneGain);
+  toneGain.connect(audioContext.destination);
+
+  hiss.start(now);
+  hiss.stop(now + 0.1);
+  tone.start(now);
+  tone.stop(now + 0.1);
+}
+
+function playEatSound() {
+  if (!audioContext) return;
+
+  const now = audioContext.currentTime;
+
+  const squelch = audioContext.createOscillator();
+  squelch.type = 'triangle';
+  squelch.frequency.setValueAtTime(420, now);
+  squelch.frequency.exponentialRampToValueAtTime(120, now + 0.16);
+
+  const lowpass = audioContext.createBiquadFilter();
+  lowpass.type = 'lowpass';
+  lowpass.frequency.value = 750;
+
+  const squelchGain = audioContext.createGain();
+  squelchGain.gain.setValueAtTime(0.0001, now);
+  squelchGain.gain.exponentialRampToValueAtTime(0.12, now + 0.03);
+  squelchGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+
+  squelch.connect(lowpass);
+  lowpass.connect(squelchGain);
+  squelchGain.connect(audioContext.destination);
+
+  const splat = audioContext.createBufferSource();
+  splat.buffer = noiseBuffer;
+
+  const splatFilter = audioContext.createBiquadFilter();
+  splatFilter.type = 'lowpass';
+  splatFilter.frequency.value = 450;
+
+  const splatGain = audioContext.createGain();
+  splatGain.gain.setValueAtTime(0.0001, now);
+  splatGain.gain.exponentialRampToValueAtTime(0.05, now + 0.02);
+  splatGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.17);
+
+  splat.connect(splatFilter);
+  splatFilter.connect(splatGain);
+  splatGain.connect(audioContext.destination);
+
+  squelch.start(now);
+  squelch.stop(now + 0.22);
+  splat.start(now);
+  splat.stop(now + 0.18);
+}
+
 function update() {
   if (isGameOver) return;
 
@@ -64,9 +167,11 @@ function update() {
     return;
   }
 
+  playMoveSound();
   worm.unshift(newHead);
 
   if (newHead.x === food.x && newHead.y === food.y) {
+    playEatSound();
     score += 1;
     scoreLabel.textContent = score;
 
@@ -84,13 +189,61 @@ function update() {
   draw();
 }
 
-function drawCell(x, y, color, radius = 4) {
+function drawBlob(x, y, isHead) {
   const px = x * gridSize;
   const py = y * gridSize;
+  const centerX = px + gridSize / 2;
+  const centerY = py + gridSize / 2;
 
-  ctx.fillStyle = color;
+  const gradient = ctx.createRadialGradient(
+    centerX - 4,
+    centerY - 4,
+    2,
+    centerX,
+    centerY,
+    gridSize * 0.52,
+  );
+  gradient.addColorStop(0, isHead ? '#91ff95' : '#73eb79');
+  gradient.addColorStop(1, isHead ? '#2f9f44' : '#22883a');
+
+  ctx.fillStyle = gradient;
+
   ctx.beginPath();
-  ctx.roundRect(px + 1, py + 1, gridSize - 2, gridSize - 2, radius);
+  ctx.arc(centerX - 3, centerY - 2, gridSize * 0.34, 0, Math.PI * 2);
+  ctx.arc(centerX + 4, centerY + 1, gridSize * 0.3, 0, Math.PI * 2);
+  ctx.arc(centerX, centerY + 4, gridSize * 0.26, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawStar(x, y) {
+  const px = x * gridSize + gridSize / 2;
+  const py = y * gridSize + gridSize / 2;
+  const outerRadius = gridSize * 0.42;
+  const innerRadius = gridSize * 0.18;
+
+  ctx.beginPath();
+
+  for (let i = 0; i < 10; i += 1) {
+    const angle = -Math.PI / 2 + (i * Math.PI) / 5;
+    const radius = i % 2 === 0 ? outerRadius : innerRadius;
+    const sx = px + Math.cos(angle) * radius;
+    const sy = py + Math.sin(angle) * radius;
+
+    if (i === 0) {
+      ctx.moveTo(sx, sy);
+    } else {
+      ctx.lineTo(sx, sy);
+    }
+  }
+
+  ctx.closePath();
+
+  const gradient = ctx.createRadialGradient(px - 2, py - 3, 2, px, py, outerRadius);
+  gradient.addColorStop(0, '#fff8b8');
+  gradient.addColorStop(0.6, '#ffd84d');
+  gradient.addColorStop(1, '#f5b301');
+
+  ctx.fillStyle = gradient;
   ctx.fill();
 }
 
@@ -112,10 +265,10 @@ function draw() {
     ctx.stroke();
   }
 
-  drawCell(food.x, food.y, '#e24f5f', 12);
+  drawStar(food.x, food.y);
 
   worm.forEach((segment, index) => {
-    drawCell(segment.x, segment.y, index === 0 ? '#2d63f2' : '#4f8aff');
+    drawBlob(segment.x, segment.y, index === 0);
   });
 }
 
@@ -142,6 +295,7 @@ document.addEventListener('keydown', (event) => {
   const key = event.key.toLowerCase();
 
   if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'w', 'a', 's', 'd'].includes(key)) {
+    ensureAudio();
     event.preventDefault();
   }
 
@@ -152,6 +306,7 @@ document.addEventListener('keydown', (event) => {
 });
 
 restartButton.addEventListener('click', () => {
+  ensureAudio();
   resetGame();
 });
 
