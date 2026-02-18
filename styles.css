@@ -1,17 +1,181 @@
+:root {
+  color-scheme: light;
+  --bg: #f3f5fb;
+  --surface: #ffffff;
+  --ink: #1c2340;
+  --muted: #556080;
+  --border: #d9e0f1;
+  --primary: #2d5bff;
+  --secondary: #f0f3ff;
+  --danger: #a63030;
+  --success: #0c8f58;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f0f0f0;
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
 }
 
-#game-container {
-    position: relative;
+.app-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
 }
 
-#gameCanvas {
-    border: 1px solid #000;
+header h1 {
+  margin-bottom: 0.3rem;
+}
+
+header p {
+  margin-top: 0;
+  color: var(--muted);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 6px 20px rgba(26, 42, 80, 0.06);
+}
+
+.controls {
+  margin-top: 1rem;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+
+button {
+  border: 0;
+  border-radius: 10px;
+  background: var(--primary);
+  color: #fff;
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button.secondary {
+  background: var(--secondary);
+  color: var(--ink);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+textarea {
+  width: 100%;
+  margin-top: 0.35rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  padding: 0.75rem;
+  font: inherit;
+  line-height: 1.5;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#listenStatus {
+  margin: 0.65rem 0 0;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.grid {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+.result-list {
+  padding-left: 1.1rem;
+  margin-bottom: 0;
+}
+
+.result-list li {
+  margin-bottom: 0.5rem;
+}
+
+.empty {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.raid-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.raid-table th,
+.raid-table td {
+  border: 1px solid var(--border);
+  padding: 0.42rem;
+  vertical-align: top;
+}
+
+.badge {
+  border-radius: 999px;
+  display: inline-block;
+  padding: 0.12rem 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.badge-risk {
+  background: #feeaea;
+  color: var(--danger);
+}
+
+.badge-issue {
+  background: #fff0e0;
+  color: #a95a00;
+}
+
+.badge-assumption {
+  background: #ebf3ff;
+  color: #2256a2;
+}
+
+.badge-dependency {
+  background: #ebfff6;
+  color: var(--success);
+}
+
+.export-card {
+  margin-top: 1rem;
+}
+
+.footnote {
+  font-size: 0.84rem;
+  color: var(--muted);
+  margin-bottom: 0;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
 }
