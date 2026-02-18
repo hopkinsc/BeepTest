@@ -1,15 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Face Game</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meeting Scope & RAID Planner</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    <div id="game-container">
-        <canvas id="gameCanvas" width="480" height="320"></canvas>
-    </div>
-    <script src="game.js"></script>
+  <main class="app-shell">
+    <header>
+      <h1>Meeting Scope & RAID Planner</h1>
+      <p>
+        Capture meeting notes live, extract project actions and RAID signals,
+        and export a PowerPoint project plan.
+      </p>
+    </header>
+
+    <section class="controls card">
+      <div class="button-row">
+        <button id="startListeningBtn" type="button">🎙️ Start listening</button>
+        <button id="stopListeningBtn" type="button" disabled>⏹️ Stop listening</button>
+        <button id="analyzeBtn" type="button">🧠 Analyze transcript</button>
+        <button id="clearBtn" type="button" class="secondary">🧹 Clear</button>
+      </div>
+      <label for="transcriptInput">Meeting transcript</label>
+      <textarea
+        id="transcriptInput"
+        placeholder="Paste notes here or use live listening..."
+        rows="12"
+      ></textarea>
+      <div class="status-row">
+        <p id="listenStatus" aria-live="polite">Microphone idle.</p>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Action Items</h2>
+        <ul id="actionsList" class="result-list"></ul>
+      </article>
+
+      <article class="card">
+        <h2>Scope Impact Mentions</h2>
+        <ul id="scopeList" class="result-list"></ul>
+      </article>
+
+      <article class="card">
+        <h2>RAID Register</h2>
+        <div id="raidContainer"></div>
+      </article>
+
+      <article class="card">
+        <h2>Delegation Suggestions</h2>
+        <ul id="delegationList" class="result-list"></ul>
+      </article>
+    </section>
+
+    <section class="card export-card">
+      <h2>PowerPoint Plan</h2>
+      <p>
+        Export current analysis to a PPT with summary, RAID table, and next
+        actions.
+      </p>
+      <button id="exportPptBtn" type="button">📊 Export project plan (PPTX)</button>
+      <p class="footnote">
+        Uses the browser Web Speech API and PptxGenJS. Works best in Chromium-based browsers.
+      </p>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.min.js"></script>
+  <script src="game.js"></script>
 </body>
 </html>
